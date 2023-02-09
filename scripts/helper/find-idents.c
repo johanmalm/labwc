@@ -54,6 +54,7 @@ enum {
 	SPECIAL_COMPARISON_OP,
 	SPECIAL_COMMENT_BEGIN,
 	SPECIAL_COMMENT_END,
+	SPECIAL_COMMENT_LINE_BEGIN,
 };
 
 static char *current_buffer_position;
@@ -114,6 +115,7 @@ add_token(void)
 static void
 handle_whitespace(struct token *token)
 {
+	return;
 	if (current_buffer_position[0] == '\n') {
 		++current_line;
 	}
@@ -198,6 +200,7 @@ struct {
 	{ "!=", SPECIAL_COMPARISON_OP },
 	{ "/*", SPECIAL_COMMENT_BEGIN },
 	{ "*/", SPECIAL_COMMENT_END },
+	{ "//", SPECIAL_COMMENT_LINE_BEGIN },
 	{ ";", ';' },
 	{ "{", '{' },
 	{ "}", '}' },
@@ -282,6 +285,7 @@ lex(char *buffer)
 	tokens = NULL;
 	nr_tokens = 0;
 	alloc_tokens = 0;
+	bool in_single_comment = false;
 
 	current_buffer_position = buffer;
 
@@ -309,11 +313,21 @@ lex(char *buffer)
 			token = add_token();
 			get_special_token(token);
 			token->kind = TOKEN_SPECIAL;
+			if (token->special == SPECIAL_COMMENT_LINE_BEGIN) {
+				token->special = SPECIAL_COMMENT_BEGIN;
+				in_single_comment = true;
+			}
 			continue;
 		case '#':
 			handle_preprocessor_directive();
 			break;
 		case '\n':
+			if (in_single_comment) {
+				token = add_token();
+				token->kind = TOKEN_SPECIAL;
+				token->special = SPECIAL_COMMENT_END;
+				in_single_comment = false;
+			}
 			++current_line;
 			break;
 		default:
@@ -350,14 +364,14 @@ static bool
 grep(struct token *tokens, const char *pattern)
 {
 	bool found = false;
-	bool in_comment = false;
+	unsigned int in_comment = 0;
 
 	for (struct token *t = tokens; t->kind; t++) {
 		if (t->kind == TOKEN_SPECIAL) {
 			if (t->special == SPECIAL_COMMENT_BEGIN) {
-				in_comment = true;
+				++in_comment;
 			} else if (t->special == SPECIAL_COMMENT_END) {
-				in_comment = false;
+				--in_comment;
 			}
 		}
 		if (in_comment) {
