@@ -54,7 +54,6 @@ enum {
 	SPECIAL_COMPARISON_OP,
 	SPECIAL_COMMENT_BEGIN,
 	SPECIAL_COMMENT_END,
-	SPECIAL_COMMENT_LINE,
 };
 
 static char *current_buffer_position;
@@ -199,7 +198,6 @@ struct {
 	{ "!=", SPECIAL_COMPARISON_OP },
 	{ "/*", SPECIAL_COMMENT_BEGIN },
 	{ "*/", SPECIAL_COMMENT_END },
-	{ "//", SPECIAL_COMMENT_LINE },
 	{ ";", ';' },
 	{ "{", '{' },
 	{ "}", '}' },
@@ -278,21 +276,6 @@ handle_preprocessor_directive(void)
 	}
 }
 
-static void
-ignore_until_end_of_line(void)
-{
-	for (;;) {
-		++current_buffer_position;
-		if (current_buffer_position[0] == '\0') {
-			return;
-		}
-		if (current_buffer_position[0] == '\n') {
-			/* current_line will be incremented in lex() */
-			return;
-		}
-	}
-}
-
 struct token *
 lex(char *buffer)
 {
@@ -326,9 +309,6 @@ lex(char *buffer)
 			token = add_token();
 			get_special_token(token);
 			token->kind = TOKEN_SPECIAL;
-			if (token->special == SPECIAL_COMMENT_LINE) {
-				ignore_until_end_of_line();
-			}
 			continue;
 		case '#':
 			handle_preprocessor_directive();
