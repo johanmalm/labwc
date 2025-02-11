@@ -39,10 +39,31 @@ desktop_arrange_all_views(struct server *server)
 	}
 }
 
+static void
+close_all_layer_popups(struct server *server)
+{
+	struct output *output;
+	wl_list_for_each(output, &server->outputs, link) {
+		struct wlr_scene_node *node;
+//		wl_list_for_each(node, &output->layer_popup_tree->children, link) {
+		wl_list_for_each(node, &output->layer_tree[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY]->children, link) {
+			wlr_log(WLR_ERROR, "X=%d", wl_list_length(&output->layer_tree[ZWLR_LAYER_SHELL_V1_LAYER_OVERLAY]->children));
+			struct node_descriptor *desc = node->data;
+			if (desc->type != LAB_NODE_DESC_LAYER_POPUP) {
+				continue;
+			}
+			struct lab_layer_popup *popup;
+			popup = node_layer_popup_from_node(node);
+			wlr_xdg_popup_destroy(popup->wlr_popup);
+		}
+	}
+}
+
 void
 desktop_focus_view(struct view *view, bool raise)
 {
 	assert(view);
+	close_all_layer_popups(view->server);
 	/*
 	 * Guard against views with no mapped surfaces when handling
 	 * 'request_activate' and 'request_minimize'.
