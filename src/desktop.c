@@ -89,16 +89,23 @@ desktop_focus_view(struct view *view, bool raise)
 	}
 }
 
-/* TODO: focus layer-shell surfaces also? */
 void
 desktop_focus_view_or_surface(struct seat *seat, struct view *view,
 		struct wlr_surface *surface, bool raise)
 {
 	assert(view || surface);
+
 	if (view) {
 		desktop_focus_view(view, raise);
-#if HAVE_XWAYLAND
 	} else {
+		struct wlr_layer_surface_v1 *layer =
+			wlr_layer_surface_v1_try_from_wlr_surface(surface);
+		if (layer) {
+			layer_try_set_focus(seat, layer);
+			//seat_set_focus_layer(seat, layer);
+			return;
+		}
+#if HAVE_XWAYLAND
 		struct wlr_xwayland_surface *xsurface =
 			wlr_xwayland_surface_try_from_wlr_surface(surface);
 		if (xsurface && wlr_xwayland_or_surface_wants_focus(xsurface)) {
