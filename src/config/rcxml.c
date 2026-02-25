@@ -426,6 +426,8 @@ fill_action_query(struct action *action, xmlNode *node, struct view_query *query
 			query->shaded = parse_tristate(content);
 		} else if (!strcasecmp(key, "maximized")) {
 			query->maximized = view_axis_parse(content);
+		} else if (!strcasecmp(key, "fullscreen")) {
+			query->fullscreen = parse_tristate(content);
 		} else if (!strcasecmp(key, "iconified")) {
 			query->iconified = parse_tristate(content);
 		} else if (!strcasecmp(key, "focused")) {

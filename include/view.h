@@ -298,6 +298,7 @@ struct view_query {
 	char *sandbox_app_id;
 	enum lab_tristate shaded;
 	enum view_axis maximized;
+	enum lab_tristate fullscreen;
 	enum lab_tristate iconified;
 	enum lab_tristate focused;
 	enum lab_tristate omnipresent;

@@ -172,6 +172,10 @@ view_matches_query(struct view *view, struct view_query *query)
 		return false;
 	}
 
+	if (!query_tristate_match(query->fullscreen, view->fullscreen)) {
+		return false;
+	}
+
 	if (!query_tristate_match(query->iconified, view->minimized)) {
 		return false;
 	}
