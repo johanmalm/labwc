@@ -42,7 +42,7 @@ struct pixmap {
 struct tokenizer_context {
 	char *buffer_position;
 	struct token *tokens;
-	int nr_tokens, alloc_tokens;
+	size_t nr_tokens, alloc_tokens;
 };
 
 static void

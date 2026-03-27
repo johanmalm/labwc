@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: GPL-2.0-only
 #define _POSIX_C_SOURCE 200809L
+#include <errno.h>
 #include <getopt.h>
+#include <limits.h>
 #include <pango/pangocairo.h>
 #include <signal.h>
 #include <unistd.h>
@@ -121,12 +123,14 @@ send_signal_to_labwc_pid(int signal)
 		wlr_log(WLR_ERROR, "LABWC_PID not set");
 		exit(EXIT_FAILURE);
 	}
-	int pid = atoi(labwc_pid);
-	if (!pid) {
-		wlr_log(WLR_ERROR, "should not send signal to pid 0");
+	errno = 0;
+	char *endptr;
+	long pid_l = strtol(labwc_pid, &endptr, 10);
+	if (errno || *endptr || pid_l <= 0 || pid_l > INT_MAX) {
+		wlr_log(WLR_ERROR, "invalid LABWC_PID: %s", labwc_pid);
 		exit(EXIT_FAILURE);
 	}
-	kill(pid, signal);
+	kill((int)pid_l, signal);
 }
 
 struct idle_ctx {

@@ -2,6 +2,8 @@
 #define _POSIX_C_SOURCE 200809L
 #include "input/cursor.h"
 #include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <time.h>
 #include <wlr/backend/libinput.h>
 #include <wlr/types/wlr_cursor.h>
@@ -1559,7 +1561,15 @@ cursor_load(struct seat *seat)
 {
 	const char *xcursor_theme = getenv("XCURSOR_THEME");
 	const char *xcursor_size = getenv("XCURSOR_SIZE");
-	uint32_t size = xcursor_size ? atoi(xcursor_size) : 24;
+	uint32_t size = 24;
+	if (xcursor_size) {
+		errno = 0;
+		char *endptr;
+		unsigned long parsed = strtoul(xcursor_size, &endptr, 10);
+		if (!errno && *endptr == '\0' && parsed > 0) {
+			size = (uint32_t)parsed;
+		}
+	}
 
 	if (seat->xcursor_manager) {
 		wlr_xcursor_manager_destroy(seat->xcursor_manager);

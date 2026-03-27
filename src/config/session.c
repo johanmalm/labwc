@@ -213,13 +213,17 @@ execute_update(const char *env_keys, const char *env_unset_keys, bool initialize
 	char *cmd =
 		strdup_printf("dbus-update-activation-environment %s",
 			initialize ? env_keys : env_unset_keys);
-	spawn_async_no_shell(cmd);
-	free(cmd);
+	if (cmd) {
+		spawn_async_no_shell(cmd);
+		free(cmd);
+	}
 
 	cmd = strdup_printf("systemctl --user %s %s",
 		initialize ? "import-environment" : "unset-environment", env_keys);
-	spawn_async_no_shell(cmd);
-	free(cmd);
+	if (cmd) {
+		spawn_async_no_shell(cmd);
+		free(cmd);
+	}
 }
 
 static void
@@ -314,8 +318,10 @@ session_run_script(const char *script)
 		}
 		wlr_log(WLR_INFO, "run session script %s", path->string);
 		char *cmd = strdup_printf("sh %s", path->string);
-		spawn_async_no_shell(cmd);
-		free(cmd);
+		if (cmd) {
+			spawn_async_no_shell(cmd);
+			free(cmd);
+		}
 
 		if (!should_merge_config) {
 			break;
