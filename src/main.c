@@ -126,7 +126,7 @@ send_signal_to_labwc_pid(int signal)
 	errno = 0;
 	char *endptr;
 	long pid_l = strtol(labwc_pid, &endptr, 10);
-	if (errno || *endptr || pid_l <= 0 || pid_l > INT_MAX) {
+	if (*endptr || pid_l <= 0 || pid_l > INT_MAX || errno == ERANGE) {
 		wlr_log(WLR_ERROR, "invalid LABWC_PID: %s", labwc_pid);
 		exit(EXIT_FAILURE);
 	}

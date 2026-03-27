@@ -3,6 +3,7 @@
 #include "input/cursor.h"
 #include <assert.h>
 #include <errno.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <time.h>
 #include <wlr/backend/libinput.h>
@@ -1566,7 +1567,7 @@ cursor_load(struct seat *seat)
 		errno = 0;
 		char *endptr;
 		unsigned long parsed = strtoul(xcursor_size, &endptr, 10);
-		if (!errno && *endptr == '\0' && parsed > 0) {
+		if (!errno && *endptr == '\0' && parsed > 0 && parsed <= UINT32_MAX) {
 			size = (uint32_t)parsed;
 		}
 	}
