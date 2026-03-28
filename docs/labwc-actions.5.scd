@@ -485,6 +485,9 @@ Actions that execute other actions. Used in keyboard/mouse bindings.
 			horizontal axis only, the vertical axis only, or neither
 			axis (none).
 
+		*fullscreen* [yes|no]
+			Whether or not the client is fullscreen.
+
 		*iconified* [yes|no]
 			Whether or not the client is iconified.
 
